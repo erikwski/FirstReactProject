@@ -1,57 +1,80 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, Button } from 'react-native';
-
+import { StyleSheet, View, FlatList, Modal, Button, Text, Image } from 'react-native';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
-  const [enteredText, setEnteredGoalText] = useState("")
-  function inputChange(enteredText){
-    setEnteredGoalText(enteredText);
+  const [listGoals, setNewGoals] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  function showAddModal(){
+    setModalVisible(true)
   }
-  function addGoal(){
-    console.log(enteredText);
+  function hideAddModal(){
+    setModalVisible(false)
   }
+  
+  function addGoal(newGoal){
+    hideAddModal()
+    setNewGoals((currentListGoals)=> [
+      ...currentListGoals, 
+      newGoal,
+    ])
+  }
+  function deleteGoal(id){
+    setNewGoals(currentListGoals=> currentListGoals.filter((gg, idx)=> idx !== id))
+  }
+
   return (
     <View style={container}>
-      <View style={inputContainer}>
-        <TextInput 
-          style={inputGoals} 
-          placeholder='Add your reached goals' 
-          onChangeText={inputChange}
-        ></TextInput>
-        <Button title='Add new goal' onPress={addGoal}></Button>
-      </View>
-      <View style={listContainer}>
-        <Text>Will be list of the goals</Text>
-      </View>
+      <Modal
+        animationType="slide" 
+        visible={modalVisible}
+      >
+        <GoalInput clickEvent={addGoal}></GoalInput>
+      </Modal>
+      <Image style={logo} source={require('./assets/images/goal.png')}></Image>
+      <Text style={title}>ACHIEVE YOUR GOALS</Text>
+      <Button title='NEW' onPress={showAddModal}></Button>
+      <FlatList 
+        data={listGoals} 
+        style={listContainer} 
+        renderItem={(goal)=> <GoalItem idx={goal.index} text={goal.item} onTap={deleteGoal}></GoalItem>} 
+        keyExtractor={(goal, idx)=> idx}
+        >
+      </FlatList>
     </View>
   );
 }
 
 const {
-  container, inputContainer, inputGoals, listContainer
+  container, listContainer, title, logo
 } = StyleSheet.create({
   container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
     paddingTop: 100,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "80%",
-    marginLeft: "10%",
-  },
-  inputGoals: {
-    borderWidth: 1,
-    borderColor: "gray",
-    width: '70%',
-    marginLeft: -10,
-    marginRight: 10,
+    backgroundColor: "#2a2a2a"
   },
   listContainer: {
     marginTop: 30,
+    marginBottom: 50,
     padding: 10,
     borderTopWidth: 1,
-    borderTopColor: "gainsboro"
+    borderTopColor: "#3c3c3c",
+    width: "100%"
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 30,
+    color: "#fff",
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    margin: 20
   }
-  
 });
